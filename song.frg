@@ -18,13 +18,13 @@ sig NoteInKeySignature {
     keySignature: KeySignature
 }
 
-fact KeyConstraints {
+pred KeyConstraints {
     -- Define notes in C Major for simplicity
     all n: NoteInKeySignature | n.keySignature = CMajor => 
         (n.note in C + D + E + F + G + A + B)
 }
 
-fact ChordDefinitions {
+pred ChordDefinitions {
     -- Example: C Major Chord
     MajorChord.notes = C + E + G
 }
