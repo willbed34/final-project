@@ -45,27 +45,18 @@ sig Melody {
     key: KeySignature
 }
 
--- Example constraints to form a valid melody
-pred ValidMelody(m: Melody) {
-    -- All notes are within the key signature
-    all n: Note | n in m.notes.elems => some niks: NoteInKeySignature | niks.note = n and niks.keySignature = m.key
-    -- Simple melodic progression: adjacent notes should be within an octave
-    all i: Int, j: Int | i = j + 1 and i < #m.notes.elems and j >= 0 => 
-        let n1 = m.notes.elems[i], n2 = m.notes.elems[j] | 
-            some intv: Interval | (intv in MinorSecond + MajorSecond + MinorThird + MajorThird + PerfectFourth + PerfectFifth + MinorSixth + MajorSixth + MinorSeventh + MajorSeventh + Octave)
-}
-
 -- Generate music with specific constraints
 pred generateMusic {
     some m: Melody | ValidMelody(m) and #m.notes.elems = 5
 }
 
 
-
 pred alwaysInTune {
    -- TODO: Fill me in!
     always 
 }
+
+//use temporal to ensure there are certain elements present in our music
 
 -- Run command to generate examples
 run generateMusic for exactly 5 Note, exactly 1 KeySignature, exactly 5 Interval, exactly 1 Chord
