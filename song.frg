@@ -1,22 +1,32 @@
 #lang forge
 -- Signatures define the basic elements
-sig Note { }
-one sig C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B extends Note {}
+abstract sig Tone {}
+-- 12 total
+one sig C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B extends Tone {}
 
-sig KeySignature { }
-one sig CMajor, GMajor, DMajor, AMajor, EMajor, BMajor, FSharpMajor, CSharpMajor, AFlatMajor, EFlatMajor, BFlatMajor, FMajor, DFlatMajor, GFlatMajor, CFlatMajor extends KeySignature {}
+abstract sig MajorKeySignature {
+    var acceptableTones : set Tone,
+}
+-- 15 total
+// one sig CMajor, GMajor, DMajor, AMajor, EMajor, BMajor, FSharpMajor, CSharpMajor, AFlatMajor, EFlatMajor, BFlatMajor, FMajor, DFlatMajor, GFlatMajor, CFlatMajor extends MajorKeySignature {}
+//start with just 3 for simplicity
+one sig CMajor, GMajor, DMajor extends MajorKeySignature {}
 
-sig Interval { }
+//cmajor: C, D, E, F, G, A, B
+//gmajor: D, E, F#, G, A, B, C#
+//dmajor: G, A, B, C, D, E, F#
+
+
+
+sig Interval {}
+-- 13 total
+// one sig Unison, MinorSecond, MajorSecond, MinorThird, MajorThird, PerfectFourth, Tritone, PerfectFifth, MinorSixth, MajorSixth, MinorSeventh, MajorSeventh, Octave extends Interval {}
 one sig Unison, MinorSecond, MajorSecond, MinorThird, MajorThird, PerfectFourth, Tritone, PerfectFifth, MinorSixth, MajorSixth, MinorSeventh, MajorSeventh, Octave extends Interval {}
 
-sig Chord { notes: set Note }
+
+sig Chord { tones: set Tone }
 one sig MajorChord, MinorChord, DiminishedChord, AugmentedChord extends Chord {}
 
--- Relations and constraints
-sig NoteInKeySignature {
-    note: Note,
-    keySignature: KeySignature
-}
 
 pred KeyConstraints {
     -- Define notes in C Major for simplicity
@@ -48,6 +58,13 @@ pred ValidMelody(m: Melody) {
 -- Generate music with specific constraints
 pred generateMusic {
     some m: Melody | ValidMelody(m) and #m.notes.elems = 5
+}
+
+
+
+pred alwaysInTune {
+   -- TODO: Fill me in!
+    always 
 }
 
 -- Run command to generate examples
