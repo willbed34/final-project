@@ -86,6 +86,16 @@ pred validChord {
     }
 }
 
+//makes it unsat, unsure why
+pred allButOneHaveNext {
+    some c: Chord | {
+        c.nextChord = none
+        all c1: Chord | {
+            (c1 != c) => (c1.nextChord != none)
+        }
+    }
+}
+
 // pred validMinorChord[c: MinorChord] {
 //     c.root.tone = c.third.tone - 3 and
 //     c.third.tone = c.fifth.tone - 4  // Example intervals for a minor chord
@@ -146,6 +156,7 @@ pred gernerateMusic {
     validChord
     ChordProgression
     NonRepetitiveProgression
+    // allButOneHaveNext
     // CircularChordProgression // not working anymore because of the needed intermediate steps (define more chord progressions)
     // generatePhrase
 }
