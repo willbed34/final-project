@@ -1,4 +1,6 @@
 #lang forge
+option solver Glucose
+
 -- Signatures define the basic elements
 // abstract sig Tone {}
 
@@ -23,6 +25,8 @@ sig Chord {
     // prevChord: lone Chord
 }
 
+one sig RootChord extends Chord {}
+
 pred ValidTone {
     all n: Note | n.tone >= 0 and n.tone < 12 and n.next != n
     // all n: Note | n.next != n.prev
@@ -44,7 +48,11 @@ pred CMajorScaleValid {
         n.tone = 7 => n.next.tone = 9 and
         n.tone = 9 => n.next.tone = 11 and
         n.tone = 11 => n.next.tone = 0 and
-        n.tone != 1 and n.tone != 3 and n.tone != 6 and n.tone != 8 and n.tone != 10
+        n.tone != 1 and n.tone != 3 and n.tone != 6 and n.tone != 8 and n.tone != 10 and
+        n.next.tone != 1 and n.next.tone != 3 and n.next.tone != 6 and n.next.tone != 8 and n.next.tone != 10 and
+        (n.tone = 0 or n.tone = 2 or n.tone = 4 or n.tone = 5 or n.tone = 7 or n.tone = 9 or n.tone = 11) and
+        (n.next.tone = 0 or n.next.tone = 2 or n.next.tone = 4 or n.next.tone = 5 or n.next.tone = 7 or n.next.tone = 9 or n.next.tone = 11) and
+        reachable[n, RootChord, nextChord, next, root, third, fifth]
     }
     // all n: Note | n.tone = 0 or n.tone = 2 or n.tone = 4 or n.tone = 5 or n.tone = 7 or n.tone = 9 or n.tone = 11
 }
@@ -55,6 +63,11 @@ pred scaleRelationships {
     
 }
 // chord progression
+
+pred equalTone[n1: Note, n2: Note] {
+    n1.tone = n2.tone
+    n1.next = n2.next
+}
 
 pred validChord {
     // major chord
@@ -77,7 +90,8 @@ pred validChord {
         c.root.tone != 1 and c.root.tone != 3 and c.root.tone != 6 and c.root.tone != 8 and c.root.tone != 10 and
         c.third.tone != 1 and c.third.tone != 3 and c.third.tone != 6 and c.third.tone != 8 and c.third.tone != 10 and
         c.fifth.tone != 1 and c.fifth.tone != 3 and c.fifth.tone != 6 and c.fifth.tone != 8 and c.fifth.tone != 10 and
-        no c.fifth.next
+        no c.fifth.next and
+        equalTone[c.root.next, c.third] and equalTone[c.third.next, c.fifth]
 
     }
 
@@ -97,13 +111,23 @@ pred ChordProgression {
     all c: Chord | reachable[c, c.nextChord, nextChord]
 }
 
+pred CircularChordProgression {
+    all c: Chord | reachable[c, RootChord, nextChord]
+}
+
 pred NonRepetitiveProgression {
     all c: Chord | c.nextChord != none => (c != c.nextChord)
 }
 
 
 pred gernerateMusic {
-    CMajorScaleValid and ValidTone and scaleRelationships and validChord and ChordProgression and NonRepetitiveProgression
+    CMajorScaleValid
+    ValidTone
+    scaleRelationships
+    validChord
+    ChordProgression
+    NonRepetitiveProgression
+    CircularChordProgression
 }
 
-run {gernerateMusic} for 5 Int, exactly 4 Chord, exactly 12 Note
+run {gernerateMusic} for 5 Int, exactly 4 Chord
