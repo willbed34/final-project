@@ -6,7 +6,6 @@ abstract sig Tone {}
 
 one sig A, ASharp, B, C, CSharp, D, DSharp, E, F, FSharp, G, GSharp extends Tone {}
 
-
 sig Note {
     pitch: one Int
 }
@@ -15,17 +14,13 @@ sig Chord {
     notes: set Note,
     length: one Int, //in 16th notes, so length of 4 means a quarter note
     next: lone Chord
+    //should it have a name?
 }
 
 //key sigs have partial func mapping note to int
 one sig KeySignature {
     scale: pfunc Int -> Tone
 }
-
-// fun countPiece: one Int {
-//   all
-// }
-
 
 
 pred wellFormed {
@@ -39,25 +34,35 @@ pred wellFormed {
     all c:Chord | {
         c.next != c
     }
-    
-    // Sum of all chord lengths is 32
-    // let totalLength = 0
-    // all c:Chord | {
-    //     totalLength = add[totalLength, c.length]
-    // }
-    // totalLength = 32
-    // totalLength c: Chord | c.length = 32
-
-    // //only one key signature (just changed sig def to one)
-    // #{KeySignature} = 1
 }
 
+//0 4 7
 pred majorChord[c:Chord] {
     let notes = c.notes {
+        #{notes} = 3
         some n1, n2, n3: notes |
             n1.pitch = 0 and n2.pitch = 4 and n3.pitch = 7
     }
 
+}
+
+//0 4 7 e
+pred majorSeventh[c:Chord] {
+    let notes = c.notes {
+        #{notes} = 4
+        some n1, n2, n3, n4: notes |
+            n1.pitch = 0 and n2.pitch = 4 and n3.pitch = 7 and n4.pitch = 11
+    }
+
+}
+
+//1 5 8
+pred neapolitan[c:Chord] {
+    let notes = c.notes {
+        #{notes} = 3
+        some n1, n2, n3: notes |
+            n1.pitch = 1 and n2.pitch = 5 and n3.pitch = 8 
+    }
 }
 
 //scale definition
@@ -76,6 +81,7 @@ pred cMajor {
     KeySignature.scale[11] = B
     all i:Int | {
         i < 0 => KeySignature.scale[i] = none
+        i >= 0 => KeySignature.scale[i] = KeySignature.scale[remainder[i, 12]]
     }
     //all int:
     // scale[int % 12] = C?
@@ -84,10 +90,22 @@ pred cMajor {
 pred validChords {
     all c:Chord | {
         let numNotes = #{c.notes} {
-            numNotes = 1 or numNotes = 3 or numNotes = 5
+            numNotes >= 1
         }
     }
 }
+
+pred validLength {
+    // sum[]
+    // let totalLength = 0 {
+    //     all c:Chord | {
+    //         subtract[totalLength, c.length]
+    //     }
+    //     totalLength = 32
+    // }
+}
+
+
 
 //things to add 
 //1: preds for chord progression in certain genres
@@ -97,7 +115,9 @@ pred generateMusic {
     wellFormed
     validChords
     some c:Chord | { majorChord[c]}
+    some c:Chord | { majorSeventh[c]}
+    some c:Chord | { neapolitan[c]}
     cMajor
 }
 
-run {generateMusic} for 5 Int, exactly 3 Chord, exactly 1 KeySignature
+run {generateMusic} for 6 Int, exactly 4 Chord, exactly 1 KeySignature
