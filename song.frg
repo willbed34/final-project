@@ -13,8 +13,8 @@ option solver Glucose
 // C = 0, CSharp = 1, D = 2, DSharp = 3, E = 4, F = 5, FSharp = 6, G = 7, GSharp = 8, A = 9, ASharp = 10, B = 11
 
 sig Note {
-    tone: one Int,
-    next: lone Note
+    tone: one Int
+    // next: lone Note
 }
 
 // sig CMajorScale extends Note {}
@@ -30,6 +30,14 @@ sig Chord {
 //     notesInScale: set Note
 // }
 
+// one sig CMajorScale, CMinorScale extends Scale {}
+
+// pred DefineScales {
+//     // C = 0, D = 2, E = 4, F = 5, G = 7, A = 9, B = 11
+//     CMajorScale.notesInScale = {0 + 2 + 4 + 5 + 7 + 9 + 11}
+//     CMinorScale.notesInScale = {0 + 2 + 3 + 5 + 7 + 8 + 10}
+// }
+
 // sig Phrase {
 //     chordsInPhrase: pfunc Int -> Chord
 // }
@@ -37,8 +45,7 @@ sig Chord {
 one sig RootChord extends Chord {}
 
 pred ValidTone {
-    all n: Note | n.tone >= 0 and n.tone < 12 and n.next != n
-    // all n: Note | n.next != n.prev
+    all n: Note | n.tone >= 0 and n.tone < 12
 }
 
 pred CMajorScaleValid {
@@ -57,10 +64,10 @@ pred CMajorScaleValid {
 // TODO: ADD MORE SCALES AND CHORDS
 
 
-pred equalTone[n1: Note, n2: Note] {
-    n1.tone = n2.tone
-    n1.next = n2.next
-}
+// pred equalTone[n1: Note, n2: Note] {
+//     n1.tone = n2.tone
+//     n1.next = n2.next
+// }
 
 // TODO: Generalize this to all chords
 pred validChord {
@@ -69,20 +76,17 @@ pred validChord {
     // find the min of the two things
     // min(a - b + 1 % 2, b - a + 13 % 2) = 1
     all c: Chord | {
-        // remainder[min[add[subtract[c.third.tone, c.root.tone], 1], add[subtract[c.root.tone, c.third.tone], 13]], 2] = 1
-        // remainder[min[add[subtract[c.fifth.tone, c.third.tone], 1], add[subtract[c.third.tone, c.fifth.tone], 13]], 2] = 1
-        // add[subtract[c.third.tone, c.root.tone], 1] < add[subtract[c.root.tone, c.third.tone], 13] => remainder[add[subtract[c.third.tone, c.root.tone], 1], 2] = 0 else remainder[add[subtract[c.root.tone, c.third.tone], 13], 2] = 0
-        // add[subtract[c.fifth.tone, c.third.tone], 1] < add[subtract[c.third.tone, c.fifth.tone], 13] => remainder[add[subtract[c.fifth.tone, c.third.tone], 1], 2] = 0 else remainder[add[subtract[c.third.tone, c.fifth.tone], 13], 2] = 0
-        (c.root.tone = 0 => c.third.tone = 4 and c.fifth.tone = 7) and
-        (c.root.tone = 2 => c.third.tone = 5 and c.fifth.tone = 9) and
-        (c.root.tone = 4 => c.third.tone = 7 and c.fifth.tone = 11) and
-        (c.root.tone = 5 => c.third.tone = 9 and c.fifth.tone = 0) and
-        (c.root.tone = 7 => c.third.tone = 11 and c.fifth.tone = 2) and
-        (c.root.tone = 9 => c.third.tone = 0 and c.fifth.tone = 4) and
-        (c.root.tone = 11 => c.third.tone = 2 and c.fifth.tone = 5) and
-        no c.fifth.next
-        equalTone[c.root.next, c.third] and equalTone[c.third.next, c.fifth]
+        // (c.root.tone = 0 => c.third.tone = 4 and c.fifth.tone = 7) and
+        // (c.root.tone = 2 => c.third.tone = 5 and c.fifth.tone = 9) and
+        // (c.root.tone = 4 => c.third.tone = 7 and c.fifth.tone = 11) and
+        // (c.root.tone = 5 => c.third.tone = 9 and c.fifth.tone = 0) and
+        // (c.root.tone = 7 => c.third.tone = 11 and c.fifth.tone = 2) and
+        // (c.root.tone = 9 => c.third.tone = 0 and c.fifth.tone = 4) and
+        // (c.root.tone = 11 => c.third.tone = 2 and c.fifth.tone = 5) and
 
+        // let root = c.root.tone, third = c.third.tone, fifth = c.fifth.tone |
+        (remainder[add[subtract[c.third.tone, c.root.tone], 12], 12] = 3 or c.third.tone = add[c.root.tone, 4])
+        (remainder[add[subtract[c.fifth.tone, c.third.tone], 12], 12] = 3 or c.fifth.tone = add[c.third.tone, 4])
     }
 }
 
