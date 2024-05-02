@@ -2,6 +2,7 @@
 option solver Glucose
 
 //https://en.wikipedia.org/wiki/List_of_chords <-- USEFUL!!
+//for playing the music: https://signal.vercel.app/edit
 abstract sig Tone {}
 
 one sig A, ASharp, B, C, CSharp, D, DSharp, E, F, FSharp, G, GSharp extends Tone {}
