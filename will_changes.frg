@@ -7,6 +7,12 @@ abstract sig Tone {}
 
 one sig A, ASharp, B, C, CSharp, D, DSharp, E, F, FSharp, G, GSharp extends Tone {}
 
+abstract sig ChordType {
+    // offset: one Int
+}
+
+one sig CMajor, GMajor, AMinor, FMajor extends ChordType {}
+
 sig Note {
     pitch: one Int,
     octave: one Int
@@ -14,8 +20,12 @@ sig Note {
 
 sig Chord {
     notes: set Note,
+    pitches: set Int,
+    first: lone Note,
+    last: lone Note,
     length: one Int, //in 16th notes, so length of 4 means a quarter note
-    next: lone Chord
+    next: lone Chord,
+    type: one ChordType
     //should it have a name?
 }
 
@@ -26,13 +36,16 @@ one sig KeySignature {
 
 pred wellFormed {
     //all reachable
-    some c:Chord | {
-        all c1:Chord | {
+    some c: Chord | {
+        all c1: Chord | {
             c1 != c => reachable[c1, c, next]
         }
     }
+    // all c: Chord | {
+    //     some c.next => ValidChordProgression[c, c.next]
+    // }
     //non cyclical
-    all c:Chord | {
+    all c: Chord | {
         not reachable[c, c, next]
     }
     //all pitch
@@ -42,6 +55,26 @@ pred wellFormed {
 
         n.octave = 1
     }
+
+    all c:Chord | {
+        c.first != none
+        c.first in c.notes
+        c.last != none
+        c.last in c.notes
+
+        // c.type = CMajor implies ValidCMajorNotes[c]
+        // c.type = GMajor implies ValidGMajorNotes[c]
+        // c.type = AMinor implies ValidAMinorNotes[c]
+        // c.type = FMajor implies ValidFMajorNotes[c]
+
+        // valid length
+        // (c.length = -4 or c.length = -8)
+        c.length < 0
+        c.length >= -8
+
+    }
+
+    // (sum c: Chord | sum[c.length]) = -32
 }
 
 //0 4 7
@@ -49,7 +82,9 @@ pred majorChord[c:Chord] {
     let notes = c.notes {
         #{notes} = 3
         some n1, n2, n3: notes | {
-            n1.pitch = 0 and n2.pitch = 4 and n3.pitch = 7
+            (n1.pitch = 0 and n2.pitch = 4 and n3.pitch = 7)
+            n1.octave = n2.octave
+            n2.octave = n3.octave
         }
     }
 
@@ -60,7 +95,10 @@ pred majorSeventh[c:Chord] {
     let notes = c.notes {
         #{notes} = 4
         some n1, n2, n3, n4: notes | {
-            n1.pitch = 0 and n2.pitch = 4 and n3.pitch = 7 and n4.pitch = 11
+            (n1.pitch = 0 and n2.pitch = 4 and n3.pitch = 7 and n4.pitch = 11)
+            n1.octave = n2.octave
+            n2.octave = n3.octave
+            n3.octave = n4.octave
         }
     }
 
@@ -71,7 +109,9 @@ pred neapolitan[c:Chord] {
     let notes = c.notes {
         #{notes} = 3
         some n1, n2, n3: notes | {
-            n1.pitch = 1 and n2.pitch = 5 and n3.pitch = 8 
+            (n1.pitch = 1 and n2.pitch = 5 and n3.pitch = 8)
+            n1.octave = n2.octave
+            n2.octave = n3.octave
         }
     }
 }
@@ -97,21 +137,32 @@ pred cMajor {
     KeySignature.scale[9] = A
     KeySignature.scale[10] = ASharp
     KeySignature.scale[11] = B
+    KeySignature.scale[12] = C
+    KeySignature.scale[13] = CSharp
+    KeySignature.scale[14] = D
+    KeySignature.scale[15] = DSharp
+    KeySignature.scale[16] = E
+    KeySignature.scale[17] = F
+    KeySignature.scale[18] = FSharp
     all i:Int | {
         i < 0 => KeySignature.scale[i] = none
-        i >= 12 => KeySignature.scale[i] = none
-        // i >= 0 => KeySignature.scale[i] = KeySignature.scale[remainder[i, 12]]
+        i > 18 => KeySignature.scale[i] = none
     }
-    //all int:
-    // scale[int % 12] = C?
 }
 
 pred validChords {
     all c:Chord | {
         let numNotes = #{c.notes} {
-            numNotes >= 1
+            numNotes > 0
             numNotes < 5
         }
+        let pitches = c.pitches {
+            all n: c.notes | {
+                n.pitch in pitches
+            }
+            #{pitches} = #{c.notes}
+        }
+
     }
 }
 
@@ -134,19 +185,20 @@ pred definedChord[c:Chord] {
 pred variedChords {
     //TODO: MAKE it so that checks to make sure each consecutive chord has one note with a different pitch,
     // and the prev one also has a pitch that the next doesnt have
-
-    //make sure each have one element that isnt in the other
-    // all c:Chord | {
-    //     some c.next => {
-    //         some n: Note {
-    //             n in c.notes
-    //             n.pitch
-    //         }
-    //     }
-        // (not singleNote[c.next] and not singleNote[c] and c.next != none) => {
-        //     #{c.notes - c.next.notes} > 0
-        //     #{c.next.notes - c.notes} > 0
-        // }
+    // the notes can be the same, but the pitch must be different
+    all c:Chord | {
+        some c.next => {
+            // #{c.pitches} < #{c.next.pitches} => {
+            some p: c.pitches | {
+                p not in c.next.pitches
+            }
+            // }
+            // #{c.next.pitches} < #{c.pitches} => {
+            some p: c.next.pitches | {
+                p not in c.pitches
+            }
+            // }
+        }
     }
 }
 
@@ -160,13 +212,72 @@ pred acceptableMajorNotes[c: Chord] {
         n = 5 or
         n = 7 or
         n = 9 or
-        n = 11 
+        n = 11 or 
+        n = 12 or
+        n = 14 or
+        n = 16
     }
 }
 
+pred ValidCMajorNotes[c: Chord] {
+    all n: c.notes | (
+        n.pitch = 0 or   // C
+        n.pitch = 2 or   // D
+        n.pitch = 4 or   // E
+        n.pitch = 5 or   // F
+        n.pitch = 7 or   // G
+        n.pitch = 9 or   // A
+        n.pitch = 11     // B
+    )
+}
+
+pred ValidGMajorNotes[c: Chord] {
+    all n: c.notes | {
+        n.pitch = 7 or
+        n.pitch = 9 or
+        n.pitch = 11 or
+        n.pitch = 12 or
+        n.pitch = 14 or
+        n.pitch = 16
+    }
+}
+
+pred ValidAMinorNotes[c: Chord] {
+    all n: c.notes | {
+        n.pitch = 9 or
+        n.pitch = 11 or
+        n.pitch = 12 or
+        n.pitch = 14 or
+        n.pitch = 16 or
+        n.pitch = 17
+    }
+}
+
+pred ValidFMajorNotes[c: Chord] {
+    all n: c.notes | {
+        n.pitch = 5 or
+        n.pitch = 7 or
+        n.pitch = 9 or
+        n.pitch = 10 or
+        n.pitch = 12 or
+        n.pitch = 14
+    }
+}
+
+
 //things to add 
 //1: preds for chord progression in certain genres
-
+pred ValidChordProgression[c1: Chord, c2: Chord] {
+    // (c1.root.tone = 0 or c1.root.tone = 2 or c1.root.tone = 7)
+    c1.last.pitch = 0 => c2.first.pitch = 7
+    c1.last.pitch = 2 => c2.first.pitch = 7
+    c1.last.pitch = 4 => c2.first.pitch = 7
+    c1.last.pitch = 5 => c2.first.pitch = 7
+    c1.last.pitch = 9 => c2.first.pitch = 7
+    c1.last.pitch = 11 => c2.first.pitch = 7
+    c1.last.pitch = 7 => (c2.first.pitch = 0 or c2.first.pitch = 2 or c2.first.pitch = 4 or c2.first.pitch = 5 or c2.first.pitch = 9 or c2.first.pitch = 11)
+    
+}
 
 pred generateMusic {
     wellFormed
@@ -180,6 +291,7 @@ pred generateMusic {
     }
     cMajor
     variedChords
+
 }
 
-run {generateMusic} for 5 Int, exactly 12 Note, exactly 8 Chord, exactly 1 KeySignature
+run {generateMusic} for 6 Int, exactly 12 Note, exactly 5 Chord, exactly 1 KeySignature
