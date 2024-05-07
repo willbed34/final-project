@@ -20,6 +20,10 @@ sig Note {
     octave: one Int
 }
 
+one sig Melody {
+    melodyNotes: pfunc Int -> Note
+}
+
 sig Chord {
     length: one Int, //in 16th notes, so length of 4 means a quarter note
     next: lone Chord,
@@ -262,8 +266,8 @@ pred variedChords {
 pred commonTones {
     all c:Chord | {
         some c.next => {
-            singleNote[c] or
-            singleNote[c.next] or
+            // singleNote[c] or
+            // singleNote[c.next] or
             (some n1, n2:Note | {
                 n1 = c.root or n1 = c.third or n1 = c.fifth or n1 = c.seventh
                 n2 = c.next.root or n2 = c.next.third or n2 = c.next.fifth or n2 = c.next.seventh
@@ -444,6 +448,39 @@ pred I_IV_VI_V {
 //     }
 // }
 
+pred MelodyFitsChords {
+    all i: Int | {
+        some Song.songChords[i] => {
+            let c = Song.songChords[i] {
+                let n = Melody.melodyNotes[i] {
+                    (n.pitch = c.root.pitch or n.pitch = c.third.pitch or n.pitch = c.fifth.pitch or n.pitch = c.seventh.pitch)
+                    n.octave = c.root.octave
+                }
+            }
+        }
+        // let c = Song.songChords[i] {
+        //     let n = Melody.notes[i] {
+        //         n.pitch = c.root.pitch
+        //         n.octave = c.root.octave
+        //     }
+        // }
+    }
+}
+
+// makes sure that the difference in octaves is at most 1
+pred SmoothMelody {
+    all i: Int | {
+        some Melody.melodyNotes[i] => {
+            let n = Melody.melodyNotes[i] {
+                let n1 = Melody.melodyNotes[i+1] {
+                    add[multiply[11, n1.octave], n1.pitch] - add[multiply[11, n.octave], n.pitch] <= 1
+                    add[multiply[11, n1.octave], n1.pitch] - add[multiply[11, n.octave], n.pitch] >= -1
+                }
+            }
+        }
+    }
+}
+
 pred generateMusic {
     wellFormed
     // some c:Chord | { majorChord[c]}
@@ -454,6 +491,7 @@ pred generateMusic {
     //     (not definedChord[c]) => acceptableMajorNotes[c]
     // }
     ascendingFourNoteRun
+    // some c:Chord | singleNote[c]
     // descendingFourNoteRun
 
     // validChord progressions
@@ -462,15 +500,17 @@ pred generateMusic {
     // }
 
 
-    cMajor
+    // cMajor
     variedChords
     commonTones
     //IS UNSAT vvv 
     // chordTypes
     I_VI_IV_V
-    // I_V_VI_IV
-    // I_IV_VI_V
+    I_V_VI_IV
+    I_IV_VI_V
     // I_VII_III_VI
+
+    MelodyFitsChords
 }
 
 run {generateMusic} for 7 Int, exactly 12 Note, exactly 16 Chord, exactly 1 KeySignature
