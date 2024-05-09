@@ -434,7 +434,7 @@ pred I_IV_VI_V {
     }
 }
 
-// Ensure that the molody fits the chords, suhc that it has the same pitch as the root, third, fifth, or seventh of the corresponding chord
+// Ensure that the melody fits the chords, suhc that it has the same pitch as the root, third, fifth, or seventh of the corresponding chord
 pred MelodyFitsChords {
     all i: Int | {
         some Song.songChords[i] => {
