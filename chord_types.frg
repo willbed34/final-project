@@ -344,9 +344,10 @@ pred ascendingFourNoteRun {
             add[multiply[11, n2.octave], n2.pitch] > add[multiply[11, n1.octave], n1.pitch]
             add[multiply[11, n3.octave], n3.pitch] > add[multiply[11, n2.octave], n2.pitch]
             add[multiply[11, n4.octave], n4.pitch] > add[multiply[11, n3.octave], n3.pitch]
+            //make sure that the notes are within an octave and a half of each other
+            add[add[multiply[11, n1.octave], n1.pitch], 18] > add[multiply[11, n4.octave], n4.pitch]
         }
-        //make sure that the notes are within an octave and a half of each other
-        add[add[multiply[11, n1.octave], n1.pitch], 18] > add[multiply[11, n4.octave], n4.pitch]
+        
 
     }
 }
@@ -375,6 +376,8 @@ pred descendingFourNoteRun {
             add[multiply[11, n2.octave], n2.pitch] < add[multiply[11, n1.octave], n1.pitch]
             add[multiply[11, n3.octave], n3.pitch] < add[multiply[11, n2.octave], n2.pitch]
             add[multiply[11, n4.octave], n4.pitch] < add[multiply[11, n3.octave], n3.pitch]
+            //make sure that the notes are within an octave and a half of each other
+            add[add[multiply[11, n1.octave], n1.pitch], 18] < add[multiply[11, n4.octave], n4.pitch]
         }
 
     }
@@ -487,20 +490,20 @@ pred generateMusic {
     ascendingFourNoteRun
     // descendingFourNoteRun
 
-    // TODO: Needed? If not, remove
-    // all c:Chord | {
-    //     some c.next => ValidChordProgression[c, c.next]
-    // }
-
     // cMajor // For visualization purposes, not needed for testing
 
-    // Ensure that the chords are varies and not repeated
+    // Ensure that the chords are varied and not after each other
     variedChords
 
     // Ensure that the chords have common tones between them for smooth transitions
     commonTones
     
-    // chordTypes //IS UNSAT TODO: FIX
+    //commenting out because this chord sounds dissonant
+    // some c:Chord | {
+    //     neapolitanChord[c]
+    // }
+
+    chordTypes //IS UNSAT TODO: FIX
 
     // Use the following chord progressions
     I_VI_IV_V
