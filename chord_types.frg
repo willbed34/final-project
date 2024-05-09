@@ -503,8 +503,6 @@ pred generateMusic {
     //     neapolitanChord[c]
     // }
 
-    chordTypes //IS UNSAT TODO: FIX
-
     // Use the following chord progressions
     I_VI_IV_V
     I_V_VI_IV
