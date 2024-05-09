@@ -155,7 +155,7 @@ pred wellFormed {
     validPitchAndOctave
     validChords
 
-    //TODO: look at this, prolly remove once we add octaves
+    //Ensures notes are unique
     all n: Note | {
         all n1: Note | {
             n != n1 => not (n.pitch = n1.pitch and n.octave = n1.octave)
@@ -287,14 +287,8 @@ pred definedChord[c:Chord] {
     majorChord[c] or majorSeventh[c]
 }
 
-// Ensure that the progression of chords is valid
-// Ensure that the progression of chords do not consist of repeated notes
 pred variedChords {
-    //TODO: MAKE it so that checks to make sure each consecutive chord has one note with a different pitch,
-    // and the prev one also has a pitch that the next doesnt have
-    // the notes can be the same, but the pitch must be different
-
-    //TODO: maybe clean up and write c2 = c.next
+    //checks to make sure each consecutive chord has one note with a different pitch
     all c:Chord | {
         some c.next => {
             singleNote[c]
@@ -311,12 +305,12 @@ pred variedChords {
 }
 
 
-// TODO: What is this, basically the same as above
+// Predicate to make sure that consecutive chords have a shared note for better transitions
 pred commonTones {
     all c:Chord | {
         some c.next => {
-            // singleNote[c] or
-            // singleNote[c.next] or
+            singleNote[c] or
+            singleNote[c.next] or
             (some n1, n2:Note | {
                 n1 = c.root or n1 = c.third or n1 = c.fifth or n1 = c.seventh
                 n2 = c.next.root or n2 = c.next.third or n2 = c.next.fifth or n2 = c.next.seventh
@@ -328,7 +322,6 @@ pred commonTones {
 
 // Define a valid run of chords/notes that ascend in pitch
 pred ascendingFourNoteRun {
-    //TODO: make sure that the notes are within an octave of each other
     some disj c1, c2, c3, c4: Chord | {
         singleNote[c1]
         singleNote[c2]
@@ -348,11 +341,12 @@ pred ascendingFourNoteRun {
             c2.root = n2
             c3.root = n3
             c4.root = n4
-            //can't use 1 for difference
             add[multiply[11, n2.octave], n2.pitch] > add[multiply[11, n1.octave], n1.pitch]
             add[multiply[11, n3.octave], n3.pitch] > add[multiply[11, n2.octave], n2.pitch]
             add[multiply[11, n4.octave], n4.pitch] > add[multiply[11, n3.octave], n3.pitch]
         }
+        //make sure that the notes are within an octave and a half of each other
+        add[add[multiply[11, n1.octave], n1.pitch], 18] > add[multiply[11, n4.octave], n4.pitch]
 
     }
 }
