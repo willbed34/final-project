@@ -497,7 +497,7 @@ pred generateMusic {
     // Ensure that the chords are varies and not repeated
     variedChords
 
-    // Ensure that the chords have common tones
+    // Ensure that the chords have common tones between them for smooth transitions
     commonTones
     
     // chordTypes //IS UNSAT TODO: FIX
