@@ -4,7 +4,9 @@ require("tone");
 d3.selectAll("svg > *").remove();
 
 const chorus = new tone.Chorus(2, 2.5, 0.5).start().toDestination();
-const synth = new tone.PolySynth().toDestination(); 
+
+// Configure the PolySynth with a custom Synth
+const synth = new tone.PolySynth().toDestination(); // Chain the effects and connect to the destination
 
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -28,7 +30,7 @@ const isSharp = [
 const bottom = 400;
 const top = 300;
 const left = 20;
-const right = 365;
+const right = 500;
 const w = 15;
 
 function drawStaff() {
@@ -55,18 +57,18 @@ function drawStaff() {
   d3.select(svg)
     .append("text")
     .attr("x", left)
-    .attr("y", top)
+    .attr("y", top) // Position between the second and third lines from the bottom
     .attr("fill", "black")
     .attr("font-family", "Arial, sans-serif")
-    .attr("font-size", "120px") 
+    .attr("font-size", "120px") // Adjust size based on your staff
     .text("𝄞");
   d3.select(svg)
     .append("text")
     .attr("x", left)
-    .attr("y", bottom - 1.5 * w) 
+    .attr("y", bottom - 1.5 * w) // Position between the second and third lines from the bottom
     .attr("fill", "black")
     .attr("font-family", "Arial, sans-serif")
-    .attr("font-size", "80px") 
+    .attr("font-size", "80px") // Adjust size based on your staff
     .text("𝄢");
   d3.select(svg)
     .append("line")
@@ -91,7 +93,9 @@ function drawStaff() {
     .attr("stroke", "black");
 }
 
+var g = 0;
 function getYPos(totalY) {
+  // Assuming 'top' is the top of the staff and 'w' is the distance between lines
   var y;
 
   if (totalY <= 13) {
@@ -99,6 +103,8 @@ function getYPos(totalY) {
   } else {
     y = top + 6.5 * w - (totalY - 1) * (w / 2);
   }
+
+  g++;
   return y;
 }
 
@@ -119,7 +125,7 @@ function drawEigth(x, y) {
     .attr("x1", x + 5)
     .attr("y1", y)
     .attr("x2", x + 8)
-    .attr("y2", y - 30) 
+    .attr("y2", y - 30) // Stem length upwards from the notehead
     .attr("stroke", "black")
     .attr("stroke-width", 2);
 
@@ -161,7 +167,7 @@ function drawQuarter(x, y, down) {
     .attr("x1", x + stemX)
     .attr("y1", y)
     .attr("x2", x + stemX)
-    .attr("y2", y + stemY) 
+    .attr("y2", y + stemY) // Stem length upwards from the notehead
     .attr("stroke", "black")
     .attr("stroke-width", 2);
 }
@@ -185,7 +191,7 @@ function drawHalf(x, y) {
     .attr("x1", x + 5)
     .attr("y1", y)
     .attr("x2", x + 8)
-    .attr("y2", y - 30)
+    .attr("y2", y - 30) // Stem length upwards from the notehead
     .attr("stroke", "black")
     .attr("stroke-width", 2);
 }
@@ -244,15 +250,15 @@ function drawSlash(x, y) {
     .attr("y1", yPos)
     .attr("x2", x + slashOffset)
     .attr("y2", yPos)
-    .attr("stroke", "black")
-    .attr("stroke-width", 2); 
+    .attr("stroke", "black") // Use a different color like red to make it stand out
+    .attr("stroke-width", 2); // Make the line thick enough to be visible
   d3.select(svg)
     .append("line")
     .attr("x1", x - slashOffset)
     .attr("y1", yPos2)
     .attr("x2", x + slashOffset)
     .attr("y2", yPos2)
-    .attr("stroke", "black")
+    .attr("stroke", "black") // Use a different color like red to make it stand out
     .attr("stroke-width", 2);
 }
 
@@ -399,7 +405,7 @@ function build(Chord, Melody) {
   const m = Melody.atoms().map((ltup) => fam(ltup))[0];
   var chords = [];
   var melody = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 15; i++) {
     melody.push(m.melodyNotes[i]);
     chords.push(chord.songChords[i]);
   }
