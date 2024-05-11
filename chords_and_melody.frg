@@ -118,8 +118,8 @@ pred validPitchAndOctave {
     all n: Note | {
         n.pitch >= 0
         n.pitch <= 11
-        n.octave >= 0
-        n.octave <= 2
+        n.octave >= 3
+        n.octave <= 5
     }
 }
 
@@ -429,7 +429,7 @@ pred generateMusic {
 
 }
 
-run {generateMusic} for 7 Int, exactly 12 Note, exactly 16 Chord, exactly 1 KeySignature
+run {generateMusic} for 8 Int, exactly 12 Note, exactly 16 Chord, exactly 1 KeySignature
 
 // notes
 // maybe repeat after every four chords
