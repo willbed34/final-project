@@ -1,5 +1,5 @@
 # Music Generation with Forge
-# Developed by David Doan, Isaac Jeneman, and William Bednarz
+# Developed by David Doan, Isaac Jenemann, and William Bednarz
 
 # How you structured your mode?
 We structured our model with the following structs:
