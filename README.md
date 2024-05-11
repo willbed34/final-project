@@ -77,18 +77,17 @@ Additionally, due to computation time would could not make our model more comple
 
 # Did your goals change at all from your proposal? Did you realize anything you planned was unrealistic, or that anything you thought was unrealistic was doable?
 
-Although our foundation goals did not change from our proposal from the development of the project, we found our reach goal to be more unrealistic than we realized. We found how complicated a song would be with limited parameters and with a constrained scope, and we determined that it would be unrealistic to create a song that was 24 chords long or longer due to the limitations of Forge. Upon discovering the limitations of Forge, we soon thereafter abandoned plans to implement more advanced musical concepts, as anticipated Forge would not be effective in representing them.
+Although our foundation goals did not change from our proposal from the development of the project, we found our reach goal to be more unrealistic than we realized. We found how complicated a song would be with limited parameters and with a constrained scope, and we determined that it would be unrealistic to create a song that was 24 chords long or longer due to the limitations of Forge. Upon discovering the limitations of Forge, we soon thereafter abandoned plans to implement more advanced musical concepts, as anticipated Forge would not be effective in representing them. Another change in our project was the removal of length as a parameter of our chords. While feasible from a logic perspective the complexity of implementing length both visually and sonically using Tone.js proved outside the scope of this project.
 
 # How should we understand an instance of your model and what your visualization shows (whether custom or default)?
-
-TODO:
+An instance of our model is a generated sequence of music that fits within the rules of western music theory. Currently the music is generated in CMajor although by constraining the notes it's quite easy to create snippets of music in different keys and styles. Our visualizer takes the songChords and melodies and maps them on to a bass and treble clef. The visualizer also generates an audio version of the music to help the user have a better sense of the program results. This was super helpful for us, as we created this project as it let us fine tune our generator, and figure out what was and wasn't working more easily than a simple testing file.  
 
 # Stakeholders
 
 The stakeholders for our project are anyone who wants to learn more about music and music theory. Additionally, users of logical languages such as Forge may be interested in our project as it shows how music can be created using a logical language. Music creators may also be interested in our project as it shows how music can be created using a logical language.
 
 # Testing:
-See our testing file for more information on how we tested our model.
+See our testing file for more information on how we tested our model. As discussed, while we've created a series of tests that ensure the predicates are working as anticipated, to actually test our system - we found working with the visualizer/audio a much easier way to debug and find out what was and wasn't working. 
 
 # Collaborators
 Ezra Rocha
