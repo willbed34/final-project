@@ -334,8 +334,9 @@ pred MelodyFitsChords {
         some Song.songChords[i] => {
             let c = Song.songChords[i] {
                 let n = Melody.melodyNotes[i] {
-                    (n.pitch = c.root.pitch or n.pitch = c.third.pitch or n.pitch = c.fifth.pitch)
+                    (n.pitch != c.root.pitch and n.pitch != c.third.pitch and n.pitch != c.fifth.pitch)
                     n.octave = c.root.octave
+                    (n.pitch = 0 or n.pitch = 2 or n.pitch = 4 or n.pitch = 5 or n.pitch = 7 or n.pitch = 9 or n.pitch = 11)
                 }
             }
         }
