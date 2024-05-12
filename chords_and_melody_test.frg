@@ -12,7 +12,6 @@ test suite for validRoot{
     }
 }
 
-
 test suite for nonCyclical{
     test expect{
         cyclic:{(
@@ -102,6 +101,8 @@ test suite for validChords {
                 x.seventh.octave = 1) and validChords
         } for 7 Int is unsat
 
+        validPitch: {(all c: Chord | majorChord[c]) => validChords } for 8 Int, exactly 3 Note, exactly 4 Chord, exactly 1 KeySignature is theorem
+        
         misArrangedOctave: {
             (some x: Chord | 
                 x.root.pitch = 0 and
@@ -127,8 +128,6 @@ test suite for wellFormed {
                 wellFormed
             }
         } for 7 Int is sat
-        // wellFormedTestUnsat : {
-        // } for 7 Int is unsat
     }
 }
 
@@ -157,8 +156,6 @@ test suite for acceptableMajorNotes {
 
 test suite for variedChords {
     test expect {
-        // variedChordsTestUnsat : {
-        // } for 7 Int is unsat
         variedChordsTest : {
             some disj c1, c2: Chord | {
                 c1.next = c2
@@ -180,8 +177,6 @@ test suite for commonTones {
                 commonTones
             }
         } for 7 Int is sat
-        // commonTonesTestUnsat : {
-        // } for 7 Int is unsat
     }
 }
 
@@ -330,17 +325,7 @@ test suite for I_IV_VI_V {
     }
 }
 
-// test suite for MelodyFitsChords {
-//     test expect {
-//         MelodyFitsChordsTest : {
-//         } is sat
-//         MelodyFitsChordsTestUnsat : {
-//         } is unsat
-//     }
-// }
-
 test suite for SmoothMelody {
-    // If you have tests for this predicate, put them here!
     test expect {
         SmoothMelodyTest : {
             some disj n1, n2: Note | {
@@ -352,19 +337,8 @@ test suite for SmoothMelody {
                 SmoothMelody
             }
         } for 7 Int is sat
-        // SmoothMelodyTestUnsat : {
-        // } for 7 Int is unsat
     }
 }
-
-// test suite for enoughMelodyNotes {
-//     test expect {
-//         enoughMelodyNotesTest : {
-//         } for 7 Int is sat
-//         enoughMelodyNotesTestUnsat : {
-//         } for 7 Int is unsat
-//     }
-// }
 
 test suite for cMajor {
     test expect {
