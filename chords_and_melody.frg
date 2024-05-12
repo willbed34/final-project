@@ -118,7 +118,7 @@ pred validPitchAndOctave {
     all n: Note | {
         n.pitch >= 0
         n.pitch <= 11
-        n.octave >= 3
+        n.octave >= 2
         n.octave <= 5
     }
 }
@@ -169,8 +169,11 @@ pred majorChord[c:Chord] {
     c.root.pitch = 0
     c.third.pitch = 4
     c.fifth.pitch = 7
+    c.root.octave >= 0
+    c.root.octave <= 5
+    c.root.octave = c.third.octave
+    c.third.octave = c.fifth.octave
 }
-
 
 // Determine if a chord has acceptable notes for a major chord
 pred acceptableMajorNotes[c: Chord] {
@@ -334,9 +337,8 @@ pred MelodyFitsChords {
         some Song.songChords[i] => {
             let c = Song.songChords[i] {
                 let n = Melody.melodyNotes[i] {
-                    (n.pitch != c.root.pitch and n.pitch != c.third.pitch and n.pitch != c.fifth.pitch)
+                    (n.pitch = c.root.pitch or n.pitch = c.third.pitch or n.pitch = c.fifth.pitch)
                     n.octave = c.root.octave
-                    (n.pitch = 0 or n.pitch = 2 or n.pitch = 4 or n.pitch = 5 or n.pitch = 7 or n.pitch = 9 or n.pitch = 11)
                 }
             }
         }
@@ -429,7 +431,7 @@ pred generateMusic {
 
 }
 
-run {generateMusic} for 8 Int, exactly 12 Note, exactly 16 Chord, exactly 1 KeySignature
+run {generateMusic} for 7 Int, exactly 12 Note, exactly 16 Chord, exactly 1 KeySignature
 
 // notes
 // maybe repeat after every four chords
