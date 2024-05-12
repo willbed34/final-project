@@ -3,10 +3,9 @@ require("tone");
 
 d3.selectAll("svg > *").remove();
 
-const chorus = new tone.Chorus(2, 2.5, 0.5).start().toDestination();
-
-// Configure the PolySynth with a custom Synth
-const synth = new tone.PolySynth().toDestination(); // Chain the effects and connect to the destination
+//CONSTANTS
+//const chorus = new tone.Chorus(2, 2.5, 0.5).start().toDestination();
+const synth = new tone.PolySynth().toDestination();
 
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -33,6 +32,7 @@ const left = 20;
 const right = 500;
 const w = 15;
 
+//VISUALIZERS
 function drawStaff() {
   let i;
   for (i = 0; i < 5; i++) {
@@ -93,55 +93,6 @@ function drawStaff() {
     .attr("stroke", "black");
 }
 
-var g = 0;
-function getYPos(totalY) {
-  // Assuming 'top' is the top of the staff and 'w' is the distance between lines
-  var y;
-
-  if (totalY <= 13) {
-    y = bottom + 1 * w - totalY * (w / 2);
-  } else {
-    y = top + 6.5 * w - (totalY - 1) * (w / 2);
-  }
-
-  g++;
-  return y;
-}
-
-function drawEigth(x, y) {
-  // Draw notehead (ellipse)
-  d3.select(svg)
-    .append("ellipse")
-    .attr("cx", x)
-    .attr("cy", y)
-    .attr("rx", 6)
-    .attr("ry", 4)
-    .attr("fill", "black")
-    .attr("transform", `rotate(-15, ${x}, ${y})`);
-
-  // Draw stem (line)
-  d3.select(svg)
-    .append("line")
-    .attr("x1", x + 5)
-    .attr("y1", y)
-    .attr("x2", x + 8)
-    .attr("y2", y - 30) // Stem length upwards from the notehead
-    .attr("stroke", "black")
-    .attr("stroke-width", 2);
-
-  d3.select(svg)
-    .append("path")
-    .attr(
-      "d",
-      `M ${x + 8}, ${y - 30} C ${x + 12}, ${y - 35} ${x + 10}, ${y - 45} ${
-        x + 8
-      }, ${y - 40}`
-    )
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-    .attr("fill", "none");
-}
-
 function drawQuarter(x, y, down) {
   var stemY = -30;
   var stemX = 5;
@@ -167,63 +118,14 @@ function drawQuarter(x, y, down) {
     .attr("x1", x + stemX)
     .attr("y1", y)
     .attr("x2", x + stemX)
-    .attr("y2", y + stemY) // Stem length upwards from the notehead
+    .attr("y2", y + stemY)
     .attr("stroke", "black")
     .attr("stroke-width", 2);
-}
-
-function drawHalf(x, y) {
-  // Draw notehead (ellipse)
-  d3.select(svg)
-    .append("ellipse")
-    .attr("cx", x)
-    .attr("cy", y)
-    .attr("rx", 6)
-    .attr("ry", 4)
-    .attr("fill", "black")
-    .attr("stroke", "transparent")
-    .attr("stroke-width", 3)
-    .attr("transform", `rotate(-15, ${x}, ${y})`);
-
-  // Draw stem (line)
-  d3.select(svg)
-    .append("line")
-    .attr("x1", x + 5)
-    .attr("y1", y)
-    .attr("x2", x + 8)
-    .attr("y2", y - 30) // Stem length upwards from the notehead
-    .attr("stroke", "black")
-    .attr("stroke-width", 2);
-}
-
-function drawFull(x, y) {
-  // Draw notehead (ellipse)
-  d3.select(svg)
-    .append("ellipse")
-    .attr("cx", x)
-    .attr("cy", y)
-    .attr("rx", 6)
-    .attr("ry", 4)
-    .attr("fill", "transparent")
-    .attr("stroke", "black")
-    .attr("stroke-width", 3)
-    .attr("transform", `rotate(-15, ${x}, ${y})`);
-}
-
-function drawSharp(x, y) {
-  d3.select(svg)
-    .append("text")
-    .attr("x", x - 14)
-    .attr("y", y + 5)
-    .attr("fill", "black")
-    .attr("font-family", "Arial, sans-serif")
-    .attr("font-size", "15px")
-    .text("#");
 }
 
 function drawSlash(x, y) {
-  const slashLength = 18; // Length of the slash
-  const slashOffset = slashLength / 2; // Half length for symmetric positioning
+  const slashLength = 18;
+  const slashOffset = slashLength / 2;
   var yPos;
   var yPos2;
 
@@ -250,15 +152,15 @@ function drawSlash(x, y) {
     .attr("y1", yPos)
     .attr("x2", x + slashOffset)
     .attr("y2", yPos)
-    .attr("stroke", "black") // Use a different color like red to make it stand out
-    .attr("stroke-width", 2); // Make the line thick enough to be visible
+    .attr("stroke", "black")
+    .attr("stroke-width", 2);
   d3.select(svg)
     .append("line")
     .attr("x1", x - slashOffset)
     .attr("y1", yPos2)
     .attr("x2", x + slashOffset)
     .attr("y2", yPos2)
-    .attr("stroke", "black") // Use a different color like red to make it stand out
+    .attr("stroke", "black")
     .attr("stroke-width", 2);
 }
 
@@ -339,24 +241,7 @@ function drawNotes(chords, melody) {
   });
 }
 
-function constructVisualization(chords, melody) {
-  drawStaff();
-  drawNotes(chords, melody);
-}
-
-function fam(expr) {
-  if (!expr.empty()) return expr.tuples()[0].atoms()[0];
-  return "none";
-}
-
-function getNoteFromInt(intValue) {
-  if (intValue >= 0 && intValue <= 11) {
-    return notes[intValue];
-  } else {
-    return null;
-  }
-}
-
+// AUDIO
 function playChords(chords, melody) {
   const now = tone.now();
   let i;
@@ -389,15 +274,128 @@ function playChords(chords, melody) {
         chords[i].seventh.octave.toString();
     }
     if (!melody[i].pitch.empty()) {
-      melodyNote = getNoteFromInt(melody[i].pitch.toString()) + "4";
+      melodyNote = getNoteFromInt(melody[i].pitch.toString()) + "5";
     }
 
     synth.triggerAttackRelease(
       [root, third, fifth, seventh, melodyNote],
-      "8n",
+      "4n",
       now + i * 0.5
     );
   }
+}
+
+// HELPERS
+function fam(expr) {
+  if (!expr.empty()) return expr.tuples()[0].atoms()[0];
+  return "none";
+}
+
+function getNoteFromInt(intValue) {
+  if (intValue >= 0 && intValue <= 11) {
+    return notes[intValue];
+  } else {
+    return null;
+  }
+}
+
+function getYPos(totalY) {
+  var y;
+
+  if (totalY <= 13) {
+    y = bottom + 1 * w - totalY * (w / 2);
+  } else {
+    y = top + 6.5 * w - (totalY - 1) * (w / 2);
+  }
+  return y;
+}
+
+// function drawEigth(x, y) {
+//   d3.select(svg)
+//     .append("ellipse")
+//     .attr("cx", x)
+//     .attr("cy", y)
+//     .attr("rx", 6)
+//     .attr("ry", 4)
+//     .attr("fill", "black")
+//     .attr("transform", `rotate(-15, ${x}, ${y})`);
+
+//   // Draw stem (line)
+//   d3.select(svg)
+//     .append("line")
+//     .attr("x1", x + 5)
+//     .attr("y1", y)
+//     .attr("x2", x + 8)
+//     .attr("y2", y - 30)
+//     .attr("stroke", "black")
+//     .attr("stroke-width", 2);
+
+//   d3.select(svg)
+//     .append("path")
+//     .attr(
+//       "d",
+//       `M ${x + 8}, ${y - 30} C ${x + 12}, ${y - 35} ${x + 10}, ${y - 45} ${
+//         x + 8
+//       }, ${y - 40}`
+//     )
+//     .attr("stroke", "black")
+//     .attr("stroke-width", 2)
+//     .attr("fill", "none");
+// }
+
+// function drawHalf(x, y) {
+//
+//   d3.select(svg)
+//     .append("ellipse")
+//     .attr("cx", x)
+//     .attr("cy", y)
+//     .attr("rx", 6)
+//     .attr("ry", 4)
+//     .attr("fill", "black")
+//     .attr("stroke", "transparent")
+//     .attr("stroke-width", 3)
+//     .attr("transform", `rotate(-15, ${x}, ${y})`);
+
+//
+//   d3.select(svg)
+//     .append("line")
+//     .attr("x1", x + 5)
+//     .attr("y1", y)
+//     .attr("x2", x + 8)
+//     .attr("y2", y - 30) /
+//     .attr("stroke", "black")
+//     .attr("stroke-width", 2);
+// }
+
+// function drawFull(x, y) {
+//   // Draw notehead (ellipse)
+//   d3.select(svg)
+//     .append("ellipse")
+//     .attr("cx", x)
+//     .attr("cy", y)
+//     .attr("rx", 6)
+//     .attr("ry", 4)
+//     .attr("fill", "transparent")
+//     .attr("stroke", "black")
+//     .attr("stroke-width", 3)
+//     .attr("transform", `rotate(-15, ${x}, ${y})`);
+// }
+
+// function drawSharp(x, y) {
+//   d3.select(svg)
+//     .append("text")
+//     .attr("x", x - 14)
+//     .attr("y", y + 5)
+//     .attr("fill", "black")
+//     .attr("font-family", "Arial, sans-serif")
+//     .attr("font-size", "15px")
+//     .text("#");
+// }
+
+//SETUP
+function constructVisualization(chords, melody) {
+  drawStaff();
+  drawNotes(chords, melody);
 }
 
 function build(Chord, Melody) {
