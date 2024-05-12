@@ -5,7 +5,19 @@ d3.selectAll("svg > *").remove();
 
 //CONSTANTS
 //const chorus = new tone.Chorus(2, 2.5, 0.5).start().toDestination();
-const synth = new tone.PolySynth().toDestination();
+const synth = new tone.PolySynth({
+    envelope: {
+        attack: 0.05,
+        decay: 0.25,
+        sustain: 0.9,
+        release: 1.2
+    },
+}).toDestination();
+
+
+tone.context.latencyHint = 'interactive'; // or 'balanced', 'playback'
+
+
 
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -29,7 +41,7 @@ const isSharp = [
 const bottom = 400;
 const top = 300;
 const left = 20;
-const right = 500;
+const right = 600;
 const w = 15;
 
 //VISUALIZERS
@@ -57,18 +69,18 @@ function drawStaff() {
   d3.select(svg)
     .append("text")
     .attr("x", left)
-    .attr("y", top) // Position between the second and third lines from the bottom
+    .attr("y", top - w / 2) // Position between the second and third lines from the bottom
     .attr("fill", "black")
     .attr("font-family", "Arial, sans-serif")
-    .attr("font-size", "120px") // Adjust size based on your staff
+    .attr("font-size", "100px") // Adjust size based on your staff
     .text("𝄞");
   d3.select(svg)
     .append("text")
     .attr("x", left)
-    .attr("y", bottom - 1.5 * w) // Position between the second and third lines from the bottom
+    .attr("y", bottom - 2.2 * w) // Position between the second and third lines from the bottom
     .attr("fill", "black")
     .attr("font-family", "Arial, sans-serif")
-    .attr("font-size", "80px") // Adjust size based on your staff
+    .attr("font-size", "60px") // Adjust size based on your staff
     .text("𝄢");
   d3.select(svg)
     .append("line")
@@ -95,7 +107,7 @@ function drawStaff() {
 
 function drawQuarter(x, y, down) {
   var stemY = -30;
-  var stemX = 5;
+  var stemX = 4;
 
   if (down) {
     stemY = 30;
@@ -110,7 +122,9 @@ function drawQuarter(x, y, down) {
     .attr("rx", 6)
     .attr("ry", 4)
     .attr("fill", "black")
-    .attr("transform", `rotate(-15, ${x}, ${y})`);
+    .attr("stroke", "black")
+    .attr("stroke-width", 1)
+    .attr("transform", `rotate(-45, ${x}, ${y})`);
 
   // Draw stem (line)
   d3.select(svg)
@@ -164,12 +178,16 @@ function drawSlash(x, y) {
     .attr("stroke-width", 2);
 }
 
-function drawNote(note, idx) {
+function drawNote(note, idx, octave, melody) {
   const basePosition = position[note.pitch.toString()];
-  const octaveAdjustment = (note.octave.toString() - 2) * 7;
+  const octaveAdjustment = (octave - 2) * 7;
   const totalY = basePosition + octaveAdjustment;
 
-  var x = left + 55 + idx * 30;
+
+  var x = (left + 60 + idx * 35);
+  if(melody){
+    x = (left + 70 + (idx + 2) * 35) /2;
+  }
   var y = getYPos(totalY);
   var down = true;
 
@@ -199,13 +217,19 @@ function drawNote(note, idx) {
     drawSharp(x, y);
   }
 
-  drawQuarter(x, y, down);
+  if(melody){
+    drawEighth(x,y,down);
+  }else{
+    drawQuarter(x,y, down);
+  }
+
+
   // if (length.equals(-6)) {
-  //   drawEigth(left + 50 + idx * 30, bottom - positionY * (w / 2), isBass);
+  //   
   // }else if(length.equals(-4)){
   //     drawQuarter(left + 50 + idx * 30, bottom - positionY * (w / 2), isBass);
   // }else if (length.equals(0)) {
-  //   drawHalf(left + 50 + idx * 30, bottom - positionY * (w / 2), isBass);
+  //   
   // }else if (length.equals(16)) {
   //   drawFull(left + 50 + idx * 30, bottom - positionY * (w / 2), isBass);
   // }else if (length.equals(16)) {
@@ -218,25 +242,25 @@ function drawNote(note, idx) {
 function drawNotes(chords, melody) {
   chords.forEach((chord, idx) => {
     if (!chord.root.empty()) {
-      drawNote(chord.root, idx);
+      drawNote(chord.root, idx, chord.root.octave.toString(), false);
     }
 
     if (!chord.third.empty()) {
-      drawNote(chord.third, idx);
+      drawNote(chord.third, idx, chord.third.octave.toString(), false);
     }
 
     if (!chord.fifth.empty()) {
-      drawNote(chord.fifth, idx);
+      drawNote(chord.fifth, idx, chord.fifth.octave.toString(), false);
     }
 
     if (!chord.seventh.empty()) {
-      drawNote(chord.seventh, idx);
+      drawNote(chord.seventh, idx, chord.seventh.octave.toString(), false);
     }
   });
 
   melody.forEach((note, idx) => {
     if (!note.empty()) {
-      drawNote(note, idx);
+      drawNote(note, idx, 5, true);
     }
   });
 }
@@ -245,43 +269,46 @@ function drawNotes(chords, melody) {
 function playChords(chords, melody) {
   const now = tone.now();
   let i;
-  synth.set({ detune: -1200 });
+  synth.set({ detune: 0 });
 
-  for (i = 0; i < chords.length; i++) {
+  for (i = 0; i < melody.length -2; i++) {
     var root;
     var third;
     var fifth;
     var seventh;
     var melodyNote;
-    if (!chords[i].root.empty()) {
+
+    var chordIndex = Math.floor(i / 2);
+
+    if (!chords[chordIndex].root.empty()) {
       root =
-        getNoteFromInt(chords[i].root.pitch.toString()) +
-        chords[i].root.octave.toString();
+        getNoteFromInt(chords[chordIndex].root.pitch.toString()) +
+        chords[chordIndex].root.octave.toString();
     }
-    if (!chords[i].third.empty()) {
+    if (!chords[chordIndex].third.empty()) {
       third =
-        getNoteFromInt(chords[i].third.pitch.toString()) +
-        chords[i].third.octave.toString();
+        getNoteFromInt(chords[chordIndex].third.pitch.toString()) +
+        chords[chordIndex].third.octave.toString();
     }
-    if (!chords[i].fifth.empty()) {
+    if (!chords[chordIndex].fifth.empty()) {
       fifth =
-        getNoteFromInt(chords[i].fifth.pitch.toString()) +
-        chords[i].fifth.octave.toString();
+        getNoteFromInt(chords[chordIndex].fifth.pitch.toString()) +
+        chords[chordIndex].fifth.octave.toString();
     }
-    if (!chords[i].seventh.empty()) {
+    if (!chords[chordIndex].seventh.empty()) {
       seventh =
-        getNoteFromInt(chords[i].seventh.pitch.toString()) +
-        chords[i].seventh.octave.toString();
+        getNoteFromInt(chords[chordIndex].seventh.pitch.toString()) +
+        chords[chordIndex].seventh.octave.toString();
     }
     if (!melody[i].pitch.empty()) {
       melodyNote = getNoteFromInt(melody[i].pitch.toString()) + "5";
     }
-
     synth.triggerAttackRelease(
-      [root, third, fifth, seventh, melodyNote],
+      [root, third, fifth, seventh],
       "4n",
-      now + i * 0.5
+      now + i * 0.3
     );
+    synth.triggerAttackRelease([melodyNote], "2n", now + i * 0.3);
   }
 }
 
@@ -310,62 +337,45 @@ function getYPos(totalY) {
   return y;
 }
 
-// function drawEigth(x, y) {
-//   d3.select(svg)
-//     .append("ellipse")
-//     .attr("cx", x)
-//     .attr("cy", y)
-//     .attr("rx", 6)
-//     .attr("ry", 4)
-//     .attr("fill", "black")
-//     .attr("transform", `rotate(-15, ${x}, ${y})`);
+function drawEighth(x, y, down) {
+  var stemY = -30;
+  var stemX = 4;
 
-//   // Draw stem (line)
-//   d3.select(svg)
-//     .append("line")
-//     .attr("x1", x + 5)
-//     .attr("y1", y)
-//     .attr("x2", x + 8)
-//     .attr("y2", y - 30)
-//     .attr("stroke", "black")
-//     .attr("stroke-width", 2);
+  if (down) {
+    stemY = 30;
+    stemX = -6;
+  }
+  
+  d3.select(svg)
+    .append("ellipse")
+    .attr("cx", x)
+    .attr("cy", y)
+    .attr("rx", 6)
+    .attr("ry", 4)
+    .attr("fill", "black")
+    .attr("stroke", "black")
+    .attr("stroke-width", 1)
+    .attr("transform", `rotate(-45, ${x}, ${y})`);
 
-//   d3.select(svg)
-//     .append("path")
-//     .attr(
-//       "d",
-//       `M ${x + 8}, ${y - 30} C ${x + 12}, ${y - 35} ${x + 10}, ${y - 45} ${
-//         x + 8
-//       }, ${y - 40}`
-//     )
-//     .attr("stroke", "black")
-//     .attr("stroke-width", 2)
-//     .attr("fill", "none");
-// }
+  d3.select(svg)
+    .append("line")
+    .attr("x1", x + stemX)
+    .attr("y1", y)
+    .attr("x2", x + stemX)
+    .attr("y2", y + stemY)
+    .attr("stroke", "black")
+    .attr("stroke-width", 2);
 
-// function drawHalf(x, y) {
-//
-//   d3.select(svg)
-//     .append("ellipse")
-//     .attr("cx", x)
-//     .attr("cy", y)
-//     .attr("rx", 6)
-//     .attr("ry", 4)
-//     .attr("fill", "black")
-//     .attr("stroke", "transparent")
-//     .attr("stroke-width", 3)
-//     .attr("transform", `rotate(-15, ${x}, ${y})`);
+  d3.select(svg)
+    .append("line")
+    .attr("x1", x + stemX)
+    .attr("y1", y +stemY)
+    .attr("x2", x + stemX + 4)
+    .attr("y2", y + stemY + 10)
+    .attr("stroke", "black")
+    .attr("stroke-width", 2);
+}
 
-//
-//   d3.select(svg)
-//     .append("line")
-//     .attr("x1", x + 5)
-//     .attr("y1", y)
-//     .attr("x2", x + 8)
-//     .attr("y2", y - 30) /
-//     .attr("stroke", "black")
-//     .attr("stroke-width", 2);
-// }
 
 // function drawFull(x, y) {
 //   // Draw notehead (ellipse)
@@ -404,9 +414,13 @@ function build(Chord, Melody) {
   var chords = [];
   var melody = [];
   for (let i = 0; i < 15; i++) {
-    melody.push(m.melodyNotes[i]);
     chords.push(chord.songChords[i]);
   }
+
+  for (let i = 0; i < 31; i++) {
+    melody.push(m.melodyNotes[i]);
+  }
+
   constructVisualization(chords, melody);
   playChords(chords, melody);
 }
