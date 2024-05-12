@@ -6,18 +6,15 @@ d3.selectAll("svg > *").remove();
 //CONSTANTS
 //const chorus = new tone.Chorus(2, 2.5, 0.5).start().toDestination();
 const synth = new tone.PolySynth({
-    envelope: {
-        attack: 0.05,
-        decay: 0.25,
-        sustain: 0.9,
-        release: 1.2
-    },
+  envelope: {
+    attack: 0.05,
+    decay: 0.25,
+    sustain: 0.9,
+    release: 1.2,
+  },
 }).toDestination();
 
-
-tone.context.latencyHint = 'interactive'; // or 'balanced', 'playback'
-
-
+tone.context.latencyHint = "playback"; // or 'balanced', 'playback'
 
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -69,18 +66,18 @@ function drawStaff() {
   d3.select(svg)
     .append("text")
     .attr("x", left)
-    .attr("y", top - w / 2) // Position between the second and third lines from the bottom
+    .attr("y", top - w / 2) 
     .attr("fill", "black")
     .attr("font-family", "Arial, sans-serif")
-    .attr("font-size", "100px") // Adjust size based on your staff
+    .attr("font-size", "100px") 
     .text("𝄞");
   d3.select(svg)
     .append("text")
     .attr("x", left)
-    .attr("y", bottom - 2.2 * w) // Position between the second and third lines from the bottom
+    .attr("y", bottom - 2.2 * w)
     .attr("fill", "black")
     .attr("font-family", "Arial, sans-serif")
-    .attr("font-size", "60px") // Adjust size based on your staff
+    .attr("font-size", "60px") 
     .text("𝄢");
   d3.select(svg)
     .append("line")
@@ -183,10 +180,9 @@ function drawNote(note, idx, octave, melody) {
   const octaveAdjustment = (octave - 2) * 7;
   const totalY = basePosition + octaveAdjustment;
 
-
-  var x = (left + 60 + idx * 35);
-  if(melody){
-    x = (left + 70 + (idx + 2) * 35) /2;
+  var x = left + 60 + idx * 35;
+  if (melody) {
+    x = (left + 70 + (idx + 2) * 35) / 2;
   }
   var y = getYPos(totalY);
   var down = true;
@@ -217,19 +213,18 @@ function drawNote(note, idx, octave, melody) {
     drawSharp(x, y);
   }
 
-  if(melody){
-    drawEighth(x,y,down);
-  }else{
-    drawQuarter(x,y, down);
+  if (melody) {
+    drawEighth(x, y, down);
+  } else {
+    drawQuarter(x, y, down);
   }
 
-
   // if (length.equals(-6)) {
-  //   
+  //
   // }else if(length.equals(-4)){
   //     drawQuarter(left + 50 + idx * 30, bottom - positionY * (w / 2), isBass);
   // }else if (length.equals(0)) {
-  //   
+  //
   // }else if (length.equals(16)) {
   //   drawFull(left + 50 + idx * 30, bottom - positionY * (w / 2), isBass);
   // }else if (length.equals(16)) {
@@ -271,7 +266,7 @@ function playChords(chords, melody) {
   let i;
   synth.set({ detune: 0 });
 
-  for (i = 0; i < melody.length -2; i++) {
+  for (i = 0; i < melody.length - 2; i++) {
     var root;
     var third;
     var fifth;
@@ -345,7 +340,7 @@ function drawEighth(x, y, down) {
     stemY = 30;
     stemX = -6;
   }
-  
+
   d3.select(svg)
     .append("ellipse")
     .attr("cx", x)
@@ -369,13 +364,12 @@ function drawEighth(x, y, down) {
   d3.select(svg)
     .append("line")
     .attr("x1", x + stemX)
-    .attr("y1", y +stemY)
+    .attr("y1", y + stemY)
     .attr("x2", x + stemX + 4)
     .attr("y2", y + stemY + 10)
     .attr("stroke", "black")
     .attr("stroke-width", 2);
 }
-
 
 // function drawFull(x, y) {
 //   // Draw notehead (ellipse)
